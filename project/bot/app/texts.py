@@ -1,0 +1,15 @@
+START_TEXT = 'Привет. Это приветственное сообщение'
+
+INSTRUCRION_BTN_TEXT = 'Инструкция'
+BUY_BTN_TEXT = 'Купить'
+REFFERAL_BTN_TEXT = 'Реферальная система'
+PROMO_BTN_TEXT = 'Ввести промокод на бесплатные генерации'
+EXAMPL_BTN_GENERATIONS = 'Примеры генераций'
+
+DESCRIPTION_BOT = 'Описание бота'
+DESCRIPTION_FIRST_OK = 'Все понял!'
+DESCRIPTION_ABOUT_PHOTO = 'Про формат который должен скидывать пользователь'
+DESCRIPTION_SECOND_OK = 'Дальше!'
+ABOUT_STYLES_AVATAR_TEXT = 'Сообщения о стилях и аватарах'
+COST_QUESTION = 'А сколько стоит?'
+ABOUT_TARIFFS = 'Сообение про пакеты'
