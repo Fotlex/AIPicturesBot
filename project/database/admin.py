@@ -46,3 +46,7 @@ class UserAdmin(admin.ModelAdmin):
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Tariffs)
+admin.site.register(Promocode)
+admin.site.register(Styles)
+admin.site.register(Categories)
+admin.site.register(PhotoFormat)

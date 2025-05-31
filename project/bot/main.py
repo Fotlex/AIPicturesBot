@@ -20,6 +20,8 @@ sys.path.append(str(BASE_DIR))
 from project import config
 from project.bot.app.middlewares import UserMiddleware
 from project.bot.app.handlers.start_handler import start
+from project.bot.app.handlers.referral_handler import referral
+from project.bot.app.handlers.promo_handler import promo
 
 async def main():
     bot = Bot(token=config.BOT_TOKEN,
@@ -27,7 +29,11 @@ async def main():
     
     dp = Dispatcher()
     
-    dp.include_routers(start,)
+    dp.include_routers(
+        start,
+        referral,
+        promo,
+    )
     
     dp.message.middleware(UserMiddleware())
     dp.callback_query.middleware(UserMiddleware())

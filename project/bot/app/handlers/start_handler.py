@@ -8,14 +8,36 @@ from ..texts import *
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.append(str(BASE_DIR))
 
-from project.database.models import Tariffs
+from project.database.models import Tariffs, User
 
 
 start = Router()
 
 
 @start.message(CommandStart())
-async def start_message(message: Message):
+async def start_message(message: Message, user: User):
+    args = message.text.split()
+    referrer_id = None
+
+    if len(args) > 1 and args[1].startswith("ref"):
+        try:
+            referrer_id = int(args[1][3:])
+        except ValueError:
+            referrer_id = None
+
+    telegram_id = message.from_user.id
+
+
+    if referrer_id and user.referrer_by is None and referrer_id != telegram_id:
+        try:
+            referrer = await sync_to_async(User.objects.get)(telegram_id=referrer_id)
+            user.referrer_by = referrer
+            #Даю награду рефефереру
+            await sync_to_async(user.save)()
+        except User.DoesNotExist:
+            pass  
+
+    
     await message.answer(text=START_TEXT, reply_markup=start_menu_keyboard())
     
     

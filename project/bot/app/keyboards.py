@@ -43,4 +43,8 @@ def btn_descript_cost():
     ])
     
     
-
+def referral_keyboard():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=GET_REFERRAL_LINK, callback_data='get_ref_link')],
+        [InlineKeyboardButton(text=REFFERAL_BALANCE, callback_data='referral_balance')]
+    ])
