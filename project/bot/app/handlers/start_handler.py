@@ -38,19 +38,24 @@ async def start_message(message: Message, user: User):
             pass  
 
     
-    await message.answer(text=START_TEXT, reply_markup=start_menu_keyboard())
+    await message.answer(text=START_TEXT, reply_markup=start_menu_keyboard(), parse_mode="Markdown",)
     
     
 @start.message(F.text == INSTRUCRION_BTN_TEXT)
 async def description_bot(message: Message):
-    await message.answer(text=DESCRIPTION_BOT, reply_markup=btn_descript_step_first())
+    await message.answer(
+        text=DESCRIPTION_BOT,
+        reply_markup=btn_descript_step_first(),
+        parse_mode="Markdown",
+    )
     
     
 @start.callback_query(F.data == 'first_ok')
 async def adout_photo(callback: CallbackQuery):
     await callback.message.edit_text(
         text=DESCRIPTION_ABOUT_PHOTO,
-        reply_markup=btn_descript_step_second()
+        reply_markup=btn_descript_step_second(),
+        parse_mode="Markdown",
     )
     
     
@@ -58,7 +63,8 @@ async def adout_photo(callback: CallbackQuery):
 async def about_styles(callback: CallbackQuery):
     await callback.message.edit_text(
         text=ABOUT_STYLES_AVATAR_TEXT,
-        reply_markup=btn_descript_cost()
+        reply_markup=btn_descript_cost(),
+        parse_mode="Markdown",
     )
     
     

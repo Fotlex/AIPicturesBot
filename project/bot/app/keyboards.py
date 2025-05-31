@@ -48,3 +48,15 @@ def referral_keyboard():
         [InlineKeyboardButton(text=GET_REFERRAL_LINK, callback_data='get_ref_link')],
         [InlineKeyboardButton(text=REFFERAL_BALANCE, callback_data='referral_balance')]
     ])
+
+
+async def tariffs_inline_keyboards():
+    tariffs = await sync_to_async(lambda: list(Tariffs.objects.all()))()
+    
+    buttons = [
+            [InlineKeyboardButton(text=f"📦 {tariff.name} {tariff.count_generations} генераций - {tariff.cost}₽", callback_data=f"payment_{tariff.id}")]
+            for tariff in tariffs
+        ]
+    
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+        

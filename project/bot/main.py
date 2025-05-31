@@ -22,10 +22,13 @@ from project.bot.app.middlewares import UserMiddleware
 from project.bot.app.handlers.start_handler import start
 from project.bot.app.handlers.referral_handler import referral
 from project.bot.app.handlers.promo_handler import promo
+from project.bot.app.handlers.pay_handler import pay
 
 async def main():
-    bot = Bot(token=config.BOT_TOKEN,
-              default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    bot = Bot(
+        token=config.BOT_TOKEN,
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML),   
+    )
     
     dp = Dispatcher()
     
@@ -33,6 +36,7 @@ async def main():
         start,
         referral,
         promo,
+        pay,
     )
     
     dp.message.middleware(UserMiddleware())
