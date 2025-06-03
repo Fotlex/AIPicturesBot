@@ -30,6 +30,7 @@ async def main():
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),   
     )
     
+    
     dp = Dispatcher()
     
     dp.include_routers(

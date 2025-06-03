@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.append(str(BASE_DIR))
 
 from project.database.models import Tariffs, User
-
+from project.bot.app.yookassa import payment_tarif_generate
 
 pay = Router()
 
@@ -58,7 +58,7 @@ async def tariffs_list(callback: CallbackQuery):
     await callback.answer('')
 
 
-@pay.callback_query(F.data.startwiths('payment_'))
+@pay.callback_query(F.data.startswith('payment_'))
 async def email_start(callback: CallbackQuery, state: FSMContext):
     tariff_id = int(callback.data.split('_')[1])
     await state.update_data(tariff = tariff_id)
@@ -72,14 +72,34 @@ async def email_start(callback: CallbackQuery, state: FSMContext):
     
     
 @pay.message(Email.wait_email)
-async def get_email(message: Message, state: FSMContext):
+async def get_email(message: Message, state: FSMContext, user: User):
     email = message.text.strip()
 
     if "@" not in email or "." not in email:
         await message.answer("❌ Некорректный email. Пожалуйста, введите корректный email.")
         return
 
+    user.email = email
+    await user.asave()
     await state.update_data(email=email)
     await state.set_state(Email.non)
+    
+    try:
+        data = await state.get_data()
+        tariff_id = data.get('tariff')
+        pay_url = await payment_tarif_generate(
+            user=user,
+            tariff_id=int(tariff_id),
+        )
+        await message.answer(
+            text=f'💳Переходите по ссылке для оплаты.',
+            reply_markup=InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [InlineKeyboardButton(text='💸', url=pay_url)]
+                ]
+            )
+        )
+    except Exception as e:
+        print(f'Ошибка: {e}')
     
     
