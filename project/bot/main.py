@@ -3,6 +3,8 @@ import asyncio
 import sys
 import os
 
+from functools import partial
+from aiohttp import web
 from pathlib import Path
 
 from aiogram import Bot, Dispatcher
@@ -23,6 +25,19 @@ from project.bot.app.handlers.start_handler import start
 from project.bot.app.handlers.referral_handler import referral
 from project.bot.app.handlers.promo_handler import promo
 from project.bot.app.handlers.pay_handler import pay
+from project.bot.app.yookassa import kassa_webhook
+
+
+async def start_webhook(bot: Bot):
+    app = web.Application()
+    app.router.add_post('/yookassa/webhook', partial(kassa_webhook, bot=bot))
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 8080) 
+    await site.start()
+    print("Webhook server started")    
+    
 
 async def main():
     bot = Bot(
@@ -39,6 +54,8 @@ async def main():
         promo,
         pay,
     )
+    
+    await start_webhook(bot=bot)
     
     dp.message.middleware(UserMiddleware())
     dp.callback_query.middleware(UserMiddleware())

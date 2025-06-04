@@ -35,9 +35,6 @@ class UserAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(url)
 
     def delete_selected(self, request, queryset):
-        """
-        Это действие для массового удаления пользователей.
-        """
         count = queryset.count()
         queryset.delete()
         self.message_user(request, f"{count} пользователей успешно удалено.")
@@ -49,3 +46,4 @@ admin.site.register(Tariffs)
 admin.site.register(Promocode)
 admin.site.register(Styles)
 admin.site.register(Categories)
+admin.site.register(PaymentRecord)

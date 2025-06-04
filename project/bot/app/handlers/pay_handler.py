@@ -12,6 +12,7 @@ sys.path.append(str(BASE_DIR))
 
 from project.database.models import Tariffs, User
 from project.bot.app.yookassa import payment_tarif_generate
+from project.bot.app.states import Email
 
 pay = Router()
 
@@ -101,5 +102,16 @@ async def get_email(message: Message, state: FSMContext, user: User):
         )
     except Exception as e:
         print(f'Ошибка: {e}')
+        
+        
+@pay.callback_query(F.data == 'instruction_avatar')
+async def instruction_avatar(callback: CallbackQuery, state: FSMContext):
+    await callback.answer('')
+    await callback.message.edit_text(
+        text=f"📸 Отправьте мне 10 фотографий для создания аватара.\n"\
+            f"Фотографии должны быть разными и хорошо освещенными!",
+        reply_markup=None
+    )
+    await state.set_state(Email.wait_photos)
     
     

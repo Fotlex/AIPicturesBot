@@ -9,4 +9,5 @@ class Email(StatesGroup):
     tariff = State()
     wait_email = State()
     non = State()
+    wait_photos = State()
     

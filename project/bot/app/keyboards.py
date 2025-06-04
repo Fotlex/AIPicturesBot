@@ -12,7 +12,7 @@ from .texts import *
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.append(str(BASE_DIR))
 
-from project.database.models import Tariffs
+from project.database.models import Tariffs, User
 
 
 def start_menu_keyboard():
@@ -59,4 +59,16 @@ async def tariffs_inline_keyboards():
         ]
     
     return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
+def main_menu_keyboard():
+    pass
+
         
+async def get_pay_tariff_keyboard(user: User):
+    if await user.avatars.aexists():
+        return main_menu_keyboard()
+    
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text='Инструкция', callback_data='instruction_avatar')]
+    ])
