@@ -5,7 +5,6 @@ from aiogram import Bot
 
 import logging
 
-from aiogram.types import InputMediaPhoto
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.append(str(BASE_DIR))
@@ -31,7 +30,7 @@ async def handle_payment_reminder_webhook(request):
         await bot.send_message(
             chat_id=user_id,
             text=message_text,
-            reply_markup=tariffs_inline_keyboards()
+            reply_markup=await tariffs_inline_keyboards()
         )
 
         return web.json_response({"message": "Payment reminder sent"}, status=200)

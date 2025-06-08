@@ -1,6 +1,5 @@
 import json
 from celery import shared_task
-from django.utils import timezone
 import time 
 import requests
 from .models import PaymentRecord, User, Mailing
@@ -8,16 +7,27 @@ from contextlib import ExitStack
 
 import config
 
-@shared_task
-def send_payment_reminder(payment_record_id):
+@shared_task()
+def check_payment_request(payment_id): 
+    payment = PaymentRecord.objects.get(payment_id=payment_id)
+    
+    if payment.status in ['succeeded', 'canceled']:
+        return
+    payload = {
+        "user_id": payment.user.id
+    }
+    
     try:
-        payment = PaymentRecord.objects.get(payment_id=payment_record_id)
-        print(f"Обработка напоминания для платежа ID: {payment.id}, Статус: {payment.status}")
-                        
-        if payment.status == 'pending':
-            pass
+        response = requests.post(f'{config.API_URL}payment-reminder/', json=payload, timeout=10) 
+        response.raise_for_status()  
+
+        payment.delete()
+        
+        return response.json() 
+
     except Exception as e:
-        print(e)
+        return {"status": "error", "message": f"Unexpected error: {e}"}
+
             
 
 @shared_task

@@ -11,12 +11,11 @@ class User(models.Model):
     
     id = models.BigIntegerField(primary_key=True)
     email = models.EmailField(null=True, blank=True)
-    first_name = models.CharField(max_length=64)
-    last_name = models.CharField(max_length=64)
-    refferal_balance = models.IntegerField(default=0)
-    photo_format = models.CharField(max_length=15, choices=PHOTO_FORMAT, blank=True, null=True)
+    first_name = models.CharField('Имя', max_length=64)
+    last_name = models.CharField('Фамилия', max_length=64)
+    photo_format = models.CharField('Формат фото', max_length=15, choices=PHOTO_FORMAT, default='1:1')
     referrer_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='referrals')
-    generation_count = models.IntegerField(default=0)
+    generation_count = models.IntegerField('Количество генераций', default=0)
     refferal_link = models.CharField(null=True, blank=True)
     
     def __str__(self):
@@ -55,9 +54,9 @@ class Avatar(models.Model):
 
     
 class Tariffs(models.Model):
-    name = models.CharField(max_length=128)
-    cost = models.PositiveIntegerField()
-    count_generations = models.PositiveIntegerField()
+    name = models.CharField('Название', max_length=128)
+    cost = models.PositiveIntegerField('Цена')
+    count_generations = models.PositiveIntegerField('Количество генераций')
     
     def __str__(self):
         return f'Пакет: {self.name} | Стоимость: {self.cost} | Кол-во генераций: {self.count_generations}'
@@ -69,9 +68,9 @@ class Tariffs(models.Model):
     
     
 class Promocode(models.Model):
-    code = models.CharField(max_length=1024)
-    count_generations = models.PositiveIntegerField(default=0)
-    count_usage = models.IntegerField()
+    code = models.CharField('Промокод', max_length=1024)
+    count_generations = models.PositiveIntegerField('Количество генераций', default=0)
+    count_usage = models.IntegerField('Сколько раз можно использовать')
     
     
     def __str__(self):
@@ -89,7 +88,7 @@ class UserPromocode(models.Model):
     
 
 class Categories(models.Model):
-    name = models.CharField(max_length=258, default='without name')
+    name = models.CharField('Название категории', max_length=258, default='without name')
     
     def __str__(self):
         return f'Категория: {self.name}'
@@ -101,7 +100,7 @@ class Categories(models.Model):
 
     
 class Styles(models.Model):
-    name = models.CharField(max_length=258, default='without name')
+    name = models.CharField('Название стиля', max_length=258, default='without name')
     category = models.ForeignKey(
         Categories,
         on_delete=models.SET_NULL, 
@@ -127,10 +126,10 @@ class PaymentRecord(models.Model):
         ('canceled', 'Отменен'),
     )
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь', related_name='payments')
     payment_id = models.CharField(max_length=100, unique=True, help_text="ID платежа в ЮKassa")
-    amount = models.DecimalField(max_digits=10, decimal_places=2, help_text="Сумма платежа")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    amount = models.DecimalField('Сумма', max_digits=10, decimal_places=2, help_text="Сумма платежа")
+    status = models.CharField('Статус', max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     metadata = models.JSONField(default=dict)
 

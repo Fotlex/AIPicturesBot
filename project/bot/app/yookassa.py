@@ -10,7 +10,6 @@ from asgiref.sync import sync_to_async
 
 from yookassa import Configuration, Payment
 from yookassa.domain.notification import WebhookNotificationFactory
-from project.database.tasks import send_payment_reminder
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
@@ -49,7 +48,6 @@ async def create_payment(amount, user, description, metadata):
         metadata=metadata,
     )
 
-    send_payment_reminder.apply_async(args=[payment_id], countdown=30)
     
     return payment.confirmation.confirmation_url
 
