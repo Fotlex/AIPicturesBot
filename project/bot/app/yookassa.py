@@ -7,9 +7,10 @@ import uuid
 from aiohttp import web
 from aiogram import Bot
 from asgiref.sync import sync_to_async
+
 from yookassa import Configuration, Payment
 from yookassa.domain.notification import WebhookNotificationFactory
-
+from project.database.tasks import send_payment_reminder
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
@@ -18,7 +19,6 @@ sys.path.append(str(BASE_DIR))
 from project.bot.app.keyboards import get_pay_tariff_keyboard
 from project.database.models import PaymentRecord, User, Tariffs
 from project import config
-
 
 Configuration.account_id = config.YOOKASSA_SHOP_ID
 Configuration.secret_key = config.YOOKASSA_SECRET_KEY
@@ -49,6 +49,8 @@ async def create_payment(amount, user, description, metadata):
         metadata=metadata,
     )
 
+    send_payment_reminder.apply_async(args=[payment_id], countdown=30)
+    
     return payment.confirmation.confirmation_url
 
 
@@ -105,7 +107,8 @@ async def kassa_webhook(request: web.Request, bot: Bot):
             
             
         elif status == "canceled":
-            pass
+            payment.status = 'canceled' 
+            await payment.asave()
 
         return web.Response(status=200, text="ok")
 

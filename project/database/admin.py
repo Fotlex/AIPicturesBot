@@ -41,6 +41,20 @@ class UserAdmin(admin.ModelAdmin):
 
     delete_selected.short_description = "Удалить выбранных пользователей"
 
+
+class AttachmentsInline(admin.TabularInline):
+    model = Attachments
+    extra = 2
+
+    exclude = ('file_id',)
+
+
+@admin.register(Mailing)
+class MailingAdmin(admin.ModelAdmin):
+    list_display = ['text', 'is_ok']
+    inlines = [AttachmentsInline]
+
+
 admin.site.register(User, UserAdmin)
 admin.site.register(Tariffs)
 admin.site.register(Promocode)

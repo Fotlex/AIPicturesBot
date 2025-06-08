@@ -19,7 +19,6 @@ def start_menu_keyboard():
     return ReplyKeyboardMarkup(keyboard=[
         [KeyboardButton(text=INSTRUCRION_BTN_TEXT)],
         [KeyboardButton(text=BUY_BTN_TEXT)],
-        [KeyboardButton(text=REFFERAL_BTN_TEXT)],
         [KeyboardButton(text=PROMO_BTN_TEXT)],
         [KeyboardButton(text=EXAMPL_BTN_GENERATIONS)],
     ], resize_keyboard=True)

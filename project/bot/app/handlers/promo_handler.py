@@ -10,7 +10,7 @@ from ..texts import *
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.append(str(BASE_DIR))
 
-from project.database.models import Promocode, User
+from project.database.models import Promocode, User, UserPromocode
 
 
 promo = Router()
@@ -21,47 +21,58 @@ async def promo_start(message: Message, state: FSMContext):
     await message.answer('Отправьте ваш промокод!')
     await state.set_state(Promo.wait_promo)
     
-    
+
+@sync_to_async
+def has_used_promocode(user, promo):
+    return UserPromocode.objects.filter(user=user, used_promocode=promo).exists()
+
+
 @promo.message(Promo.wait_promo)
 async def take_promo(message: Message, state: FSMContext, user: User):
     try:
-        # Пытаемся найти промокод (регистронезависимый поиск)
         promo = await Promocode.objects.aget(code__iexact=message.text.strip())
+
+        if await has_used_promocode(user, promo):
+            await message.answer(text='Вы уже использовали этот промокод')
+            await state.clear()
+            
+            return
         
-        # Обновляем данные пользователя
         user.generation_count += promo.count_generations
         promo.count_usage -= 1
         
-        # Удаляем промокод если он исчерпан
+        await UserPromocode.objects.acreate(
+            user=user,
+            used_promocode=promo,
+        )
+        
         if promo.count_usage <= 0:
             await promo.adelete()
         else:
             await promo.asave()
             
-        # Сохраняем пользователя
         await user.asave()
         
         await message.answer(
-            text=f'Отлично, теперь вам доступны {user.generation_count} генераций',
+            text=f'Отлично, теперь вам доступны {user.generation_count} генераций\nНачните создание своего аватара!',
             reply_markup=InlineKeyboardMarkup(
                 inline_keyboard=[[
                     InlineKeyboardButton(
                         text=GO_GENERATE_TEXT, 
-                        callback_data='go_generate'
+                        callback_data='instruction_avatar'
                     )
                 ]]
             )
         )
         
     except Promocode.DoesNotExist:
-        # Промокод не найден
         await message.answer(text=WITHOUT_PROMOCODE_TEXT, reply_markup=start_menu_keyboard())
         
     except Exception as e:
-        # Обработка других ошибок
         print(f"Ошибка при обработке промокода: {e}")
         await message.answer("Произошла ошибка при обработке промокода")
         
     finally:
-        # Всегда очищаем состояние
         await state.clear()
+        
+        

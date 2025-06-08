@@ -26,11 +26,13 @@ from project.bot.app.handlers.referral_handler import referral
 from project.bot.app.handlers.promo_handler import promo
 from project.bot.app.handlers.pay_handler import pay
 from project.bot.app.yookassa import kassa_webhook
+from project.bot.app.webhooks import handle_payment_reminder_webhook
 
 
 async def start_webhook(bot: Bot):
     app = web.Application()
     app.router.add_post('/yookassa/webhook', partial(kassa_webhook, bot=bot))
+    app.router.add_post('/payment-reminder/', handle_payment_reminder_webhook)
 
     runner = web.AppRunner(app)
     await runner.setup()

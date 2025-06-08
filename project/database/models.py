@@ -24,6 +24,7 @@ class User(models.Model):
     
     
     class Meta:
+        app_label = 'database' 
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
@@ -80,6 +81,11 @@ class Promocode(models.Model):
     class Meta:
         verbose_name = 'Промокод'
         verbose_name_plural = 'Промокоды'
+
+
+class UserPromocode(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='promo_users')
+    used_promocode = models.ForeignKey(Promocode, on_delete=models.CASCADE, related_name='promocodes')
     
 
 class Categories(models.Model):
@@ -137,5 +143,29 @@ class PaymentRecord(models.Model):
 
 
 
+class Attachments(models.Model):
+    types = {
+        'photo': 'Фото',
+        'video': 'Видео',
+        'document': 'Документ'
+    }
 
+    type = models.CharField('Тип вложения', choices=types)
+    file = models.FileField('Файл')
+    file_id = models.TextField(null=True)
+    mailing = models.ForeignKey('Mailing', on_delete=models.SET_NULL, null=True, related_name='attachments')
+
+    class Meta:
+        verbose_name = 'Вложение'
+        verbose_name_plural = 'Вложения'
+
+
+class Mailing(models.Model):
+    text = models.TextField('Текст')
+    datetime = models.DateTimeField('Дата/Время')
+    is_ok = models.BooleanField('Статус отправки')
+
+    class Meta:
+        verbose_name = 'Рассылка'
+        verbose_name_plural = 'Рассылки'
 
