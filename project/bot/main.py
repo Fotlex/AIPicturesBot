@@ -2,6 +2,7 @@ import django
 import asyncio
 import sys
 import os
+import logging
 
 from functools import partial
 from aiohttp import web
@@ -20,11 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.append(str(BASE_DIR))
 
 from project import config
-from project.bot.app.middlewares import UserMiddleware
+from project.bot.app.middlewares import UserMiddleware, MediaGroupMiddleware
 from project.bot.app.handlers.start_handler import start
 from project.bot.app.handlers.referral_handler import referral
 from project.bot.app.handlers.promo_handler import promo
 from project.bot.app.handlers.pay_handler import pay
+from project.bot.app.handlers.styles_handler import style
 from project.bot.app.yookassa import kassa_webhook
 from project.bot.app.webhooks import handle_payment_reminder_webhook
 
@@ -55,10 +57,12 @@ async def main():
         referral,
         promo,
         pay,
+        style,
     )
     
     await start_webhook(bot=bot)
     
+    dp.message.middleware(MediaGroupMiddleware())
     dp.message.middleware(UserMiddleware())
     dp.callback_query.middleware(UserMiddleware())
     
@@ -67,6 +71,7 @@ async def main():
 
 if __name__ == '__main__':
     try:
+        logging.basicConfig(level=logging.INFO, stream=sys.stdout)
         asyncio.run(main())
     except KeyboardInterrupt:
         pass

@@ -1,18 +1,24 @@
+from typing import List
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import CommandStart
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.fsm.context import FSMContext
+
+from aiohttp import ClientSession
 
 from ..keyboards import *
 from ..texts import *
 from ..states import Email
+from ..servise import generate_avatar, json
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.append(str(BASE_DIR))
 
-from project.database.models import Tariffs, User
+from project.database.models import Tariffs, User, Avatar
 from project.bot.app.yookassa import payment_tarif_generate
 from project.bot.app.states import Email
+from project.database.services import process_and_save_photos
+from project import config
 
 pay = Router()
 
@@ -96,22 +102,98 @@ async def get_email(message: Message, state: FSMContext, user: User):
             text=f'💳Переходите по ссылке для оплаты.',
             reply_markup=InlineKeyboardMarkup(
                 inline_keyboard=[
-                    [InlineKeyboardButton(text='💸', url=pay_url)]
+                    [InlineKeyboardButton(text='💸', url=pay_url)],
+                    [InlineKeyboardButton(text='test', callback_data='instruction_avatar')]
                 ]
             )
         )
     except Exception as e:
         print(f'Ошибка: {e}')
         
-        
+
+
 @pay.callback_query(F.data == 'instruction_avatar')
-async def instruction_avatar(callback: CallbackQuery, state: FSMContext):
+async def namee(callback: CallbackQuery, state: FSMContext):
+    await callback.message.answer(
+        text='Придумайте и введите имя вашего аватара:',
+    )
+    await state.set_state(Email.wait_name)
     await callback.answer('')
-    await callback.message.edit_text(
+
+
+
+@pay.message(F.text, Email.wait_name)
+async def instruction_avatar(message: Message, state: FSMContext, user: User):
+    new_avatar = await Avatar.objects.acreate(
+        user=user,
+        name=message.text,
+    )
+    
+    await message.answer(
         text=f"📸 Отправьте мне 10 фотографий для создания аватара.\n"\
             f"Фотографии должны быть разными и хорошо освещенными!",
         reply_markup=None
     )
+    await state.update_data(photos=[])
+    await state.update_data(new_avatar_id=new_avatar.id)
     await state.set_state(Email.wait_photos)
     
+
+@pay.message(Email.wait_photos, F.photo)
+async def collect_photos(message: Message, state: FSMContext, bot: Bot, user: User, album: List[Message] = None):
+    data = await state.get_data()
+    photos = data.get("photos", [])
+    avatar_id = data.get('new_avatar_id')
+
+    if album:
+        for msg in album:
+            if msg.photo:
+                photos.append(msg.photo[-1].file_id)
+    else:
+        photos.append(message.photo[-1].file_id)
     
+    await state.update_data(photos=photos)
+
+    if len(photos) >= 10:
+        photos_to_process = photos[:10]
+
+        await message.answer("Спасибо! Все 10 фото получены. Начинаю обработку...")
+        
+        avatar = await Avatar.objects.aget(id=avatar_id)
+        
+        file_relative_url = await process_and_save_photos(bot, message.from_user.id, photos)
+        
+        full_public_url = config.DEVELOP_URL + file_relative_url
+
+        result = await generate_avatar(
+            config.LORA_KEY,
+            full_public_url,
+            avatar.api_name,
+            avatar.trigger_phrase,
+            '/train_model',
+        )
+        
+        if result and result.get("status") == 'Completed':
+            user.current_avatar_id = avatar.id
+            await message.answer(
+                text='Мы создали твой аватар, можем приступать к генерации фотографий',
+                reply_markup=main_menu_keyboard()
+            )
+            avatar.is_complete = True
+            await state.clear()
+            await avatar.asave()
+            await user.asave()
+            
+        else:
+            await message.answer(
+                text=f"Что-то пошло не так, попробуем снова\n📸 Отправьте мне 10 фотографий для создания аватара.\n"\
+                    f"Фотографии должны быть разными и хорошо освещенными!",
+                reply_markup=None
+            )
+            await state.update_data(photos=[])
+            await state.set_state(Email.wait_photos)
+        
+        
+        
+            
+            

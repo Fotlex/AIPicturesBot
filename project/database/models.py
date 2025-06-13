@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 
 
@@ -17,6 +19,7 @@ class User(models.Model):
     referrer_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='referrals')
     generation_count = models.IntegerField('Количество генераций', default=0)
     refferal_link = models.CharField(null=True, blank=True)
+    current_avatar_id = models.UUIDField(null=True, blank=True)
     
     def __str__(self):
         return f'{self.id} | {self.first_name} {self.last_name}'
@@ -28,29 +31,7 @@ class User(models.Model):
         verbose_name_plural = 'Пользователи'
 
 
-class Avatar(models.Model):
-    GENDER_CHOICES = [
-        ('male', 'Мужчина'),
-        ('female', 'Женщина'),
-    ]
 
-    name = models.CharField(max_length=100, default="Model")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="avatars")
-    dataset_id = models.CharField(max_length=100, unique=True, blank=True, null=True)
-    element_id = models.CharField(max_length=100, unique=True, blank=True, null=True)
-    element_name = models.CharField(max_length=100, blank=True, null=True)
-    is_complete = models.BooleanField(default=False)
-    gender = models.CharField(max_length=15, choices=GENDER_CHOICES, null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    api_credit_cost = models.IntegerField(default=0)
-    is_active = models.BooleanField(default=False)
-
-    def str(self):
-        return f"Avatar ({self.gender}) for {self.user.first_name}"
-    
-    class Meta:
-        verbose_name = 'Формат'
-        verbose_name_plural = 'Форматы фото'
 
     
 class Tariffs(models.Model):
@@ -101,6 +82,7 @@ class Categories(models.Model):
     
 class Styles(models.Model):
     name = models.CharField('Название стиля', max_length=258, default='without name')
+    capture_for_lora = models.TextField('Промо для генерирования', null=True, blank=True)
     category = models.ForeignKey(
         Categories,
         on_delete=models.SET_NULL, 
@@ -141,6 +123,14 @@ class PaymentRecord(models.Model):
         verbose_name_plural = 'Платежи Юкасса'
 
 
+class UserArchive(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    telegram_user_id = models.BigIntegerField(unique=True)
+    archive_file = models.FileField(upload_to='archives/')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Archive for {self.telegram_user_id}"
 
 class Attachments(models.Model):
     types = {
@@ -168,3 +158,34 @@ class Mailing(models.Model):
         verbose_name = 'Рассылка'
         verbose_name_plural = 'Рассылки'
 
+
+class Avatar(models.Model):
+    GENDER_CHOICES = [
+        ('male', 'Мужчина'),
+        ('female', 'Женщина'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    name = models.CharField(max_length=100, default="Model")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="avatars")
+    api_name = models.CharField(max_length=150, unique=True, editable=False, default="Уникальное имя для API LoRA", verbose_name="Уникальное имя для API LoRA")
+    is_complete = models.BooleanField(default=False)
+    trigger_phrase = models.CharField(max_length=100, default="Уникальная тригер-фраза для API LoRA")
+    gender = models.CharField(max_length=15, choices=GENDER_CHOICES, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            self.api_name = f"u{self.user.id}_m{self.id.hex[:12]}"
+            
+            self.trigger_phrase = f"id{self.id.hex[:8]} person"
+
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"Avatar ({self.gender}) for {self.user.first_name}"
+    
+    class Meta:
+        verbose_name = 'Аватар'
+        verbose_name_plural = 'Аватары'

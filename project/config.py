@@ -22,3 +22,7 @@ BOT_NAME=os.getenv('BOT_NAME')
 
 
 API_URL=os.getenv('API_URL')
+DEVELOP_URL=os.getenv('DEVELOP_URL')
+
+TARGET_POST_URL=os.getenv('TARGET_POST_URL')
+LORA_KEY=os.getenv('LORA_KEY')

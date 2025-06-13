@@ -28,9 +28,6 @@ class UserAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(url)
 
     def delete_user_view(self, request):
-        """
-        Редирект на стандартную страницу изменения пользователей в админке
-        """
         url = reverse('admin:%s_%s_changelist' % (self.model._meta.app_label, self.model._meta.model_name))
         return HttpResponseRedirect(url)
 
@@ -61,3 +58,4 @@ admin.site.register(Promocode)
 admin.site.register(Styles)
 admin.site.register(Categories)
 admin.site.register(PaymentRecord)
+admin.site.register(Avatar)

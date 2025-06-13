@@ -69,6 +69,7 @@ async def payment_tarif_generate(user: User, tariff_id: int):
 
 
 async def kassa_webhook(request: web.Request, bot: Bot):
+    print('dsdsdsd')
     try:
         body = await request.text()
         event_dict = json.loads(body)

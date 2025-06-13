@@ -1,3 +1,4 @@
+import asyncio
 import sys
 
 from typing import Callable, Any, Dict, Awaitable
@@ -35,3 +36,46 @@ class UserMiddleware(BaseMiddleware):
         data['user'] = user
 
         return await handler(event, data)
+    
+ALBUM_DELAY = 1.0
+  
+class MediaGroupMiddleware(BaseMiddleware):
+    album_data: Dict[str, list[Message]] = {}
+    locks: Dict[str, asyncio.Lock] = {}
+
+    async def __call__(
+        self,
+        handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
+        event: Message,
+        data: Dict[str, Any]
+    ) -> Any:
+        if not event.media_group_id:
+            return await handler(event, data)
+
+        media_group_id = str(event.media_group_id)
+
+        if media_group_id not in self.locks:
+            self.locks[media_group_id] = asyncio.Lock()
+        
+        lock = self.locks[media_group_id]
+        
+        async with lock:
+            if media_group_id not in self.album_data:
+                self.album_data[media_group_id] = []
+            
+            self.album_data[media_group_id].append(event)
+        
+        await asyncio.sleep(ALBUM_DELAY)
+
+        async with lock:
+            if media_group_id not in self.album_data:
+                return
+            
+            album_messages = self.album_data.pop(media_group_id)
+            self.locks.pop(media_group_id, None)
+            
+        album_messages.sort(key=lambda x: x.message_id)
+        
+        data["album"] = album_messages
+        
+        return await handler(album_messages[0], data)

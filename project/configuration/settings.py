@@ -1,4 +1,5 @@
 import sys
+import os
 
 from pathlib import Path
 
@@ -11,9 +12,12 @@ SECRET_KEY = 'django-insecure-b#n$*nf0hrchj!opm6ncvaq^v8x6&3(hy^%+n8wvwyq)y=flr9
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
-
+CSRF_TRUSTED_ORIGINS = [
+    'https://fallaciously-jovial-sylph.cloudpub.ru',
+    'https://responsibly-lawful-shearwater.cloudpub.ru',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -103,3 +107,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
+
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

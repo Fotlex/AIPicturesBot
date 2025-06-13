@@ -9,7 +9,7 @@ def handle_new_model_instance(sender, instance, created, **kwargs):
     from .tasks import check_payment_request
     
     if created:
-        transaction.on_commit(lambda: check_payment_request.apply_async(args=[instance.payment_id], countdown=30))
+        transaction.on_commit(lambda: check_payment_request.apply_async(args=[instance.payment_id], countdown=120))
         
         
 @receiver(post_save, sender=Mailing)
