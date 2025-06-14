@@ -15,7 +15,7 @@ from yookassa.domain.notification import WebhookNotificationFactory
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.append(str(BASE_DIR))
 
-from project.bot.app.keyboards import get_pay_tariff_keyboard
+from project.bot.app.keyboards import *
 from project.database.models import PaymentRecord, User, Tariffs
 from project import config
 
@@ -68,6 +68,18 @@ async def payment_tarif_generate(user: User, tariff_id: int):
     return payment_url
 
 
+async def payment_avatar_generate(user: User):
+    payment_url = await create_payment(
+        amount=111,
+        user=user,
+        description=f'Покупка нового аватара',
+        metadata={
+            'type': 'avatar',
+        },
+    )
+    return payment_url
+
+
 async def kassa_webhook(request: web.Request, bot: Bot):
     print('dsdsdsd')
     try:
@@ -99,11 +111,20 @@ async def kassa_webhook(request: web.Request, bot: Bot):
                 await bot.send_message(
                     chat_id=payment.user.id,
                     text=f'✅Поздравляю, оплата прошла успешно!\nТеперь у вас {user.generation_count} генераций',
-                    reply_markup=await get_pay_tariff_keyboard(user=user)
+                    reply_markup=get_pay_tariff_keyboard(user=user)
                 )
 
                 await user.asave()
-            
+            if payment_type == 'avatar':
+                user = payment.user
+                
+                await bot.send_message(
+                    chat_id=payment.user.id,
+                    text=f'✅Поздравляю, оплата прошла успешно!\nТеперь у вас новый аватар',
+                    reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                        [InlineKeyboardButton(text='Создать аватар', callback_data='instruction_avatar')]
+                    ])
+                )
             
         elif status == "canceled":
             payment.status = 'canceled' 

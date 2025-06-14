@@ -26,3 +26,4 @@ DEVELOP_URL=os.getenv('DEVELOP_URL')
 
 TARGET_POST_URL=os.getenv('TARGET_POST_URL')
 LORA_KEY=os.getenv('LORA_KEY')
+SUPPORT_URL=os.getenv('SUPPORT_URL')

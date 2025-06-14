@@ -190,6 +190,7 @@ async def collect_photos(message: Message, state: FSMContext, bot: Bot, user: Us
                     f"Фотографии должны быть разными и хорошо освещенными!",
                 reply_markup=None
             )
+            await avatar.adelete()
             await state.update_data(photos=[])
             await state.set_state(Email.wait_photos)
         

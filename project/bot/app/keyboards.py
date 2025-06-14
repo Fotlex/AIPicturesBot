@@ -62,8 +62,8 @@ async def tariffs_inline_keyboards():
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
         
-async def get_pay_tariff_keyboard(user: User):
-    if await user.avatars.aexists():
+def get_pay_tariff_keyboard(user: User):
+    if user.current_avatar_id:
         return main_menu_keyboard()
     
     return InlineKeyboardMarkup(inline_keyboard=[

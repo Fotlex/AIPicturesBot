@@ -27,6 +27,8 @@ from project.bot.app.handlers.referral_handler import referral
 from project.bot.app.handlers.promo_handler import promo
 from project.bot.app.handlers.pay_handler import pay
 from project.bot.app.handlers.styles_handler import style
+from project.bot.app.handlers.generation_handlers import generate
+from project.bot.app.handlers.avatar_handler import avatar_router
 from project.bot.app.yookassa import kassa_webhook
 from project.bot.app.webhooks import handle_payment_reminder_webhook
 
@@ -58,6 +60,8 @@ async def main():
         promo,
         pay,
         style,
+        generate,
+        avatar_router,
     )
     
     await start_webhook(bot=bot)

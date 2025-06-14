@@ -64,6 +64,16 @@ async def select_style(call: CallbackQuery, callback_data: StyleCallback, user: 
     style_id = callback_data.style_id
     style = await Styles.objects.aget(id=style_id)
     avatar = await Avatar.objects.aget(id=user.current_avatar_id)
+    if user.generation_count <= 0:
+        await call.message.answer(
+            text='К сожалению, у вас закончились генерации',
+            reply_markup=InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [InlineKeyboardButton(text='Купить', callback_data='start_choise_tariff')]
+                ]
+            )
+        )
+        return
     await call.message.answer(
         text='Начинаю генерацию твоих фото...'
     )
@@ -72,6 +82,7 @@ async def select_style(call: CallbackQuery, callback_data: StyleCallback, user: 
         config.LORA_KEY,
         avatar.api_name,
         f'{avatar.trigger_phrase} {style.capture_for_lora}',
+        #size=user.photo_format
     )
     
     try:
@@ -84,6 +95,18 @@ async def select_style(call: CallbackQuery, callback_data: StyleCallback, user: 
             photo=input_file,
             caption="Первое фото, генерирую второе..."
         )
+        user.generation_count -= 1
+        await user.asave()
+        if user.generation_count <= 0:
+            await call.message.answer(
+                text='К сожалению, у вас закончились генерации',
+                reply_markup=InlineKeyboardMarkup(
+                    inline_keyboard=[
+                        [InlineKeyboardButton(text='Купить', callback_data='start_choise_tariff')]
+                    ]
+                )
+            )
+            return
     except Exception as e:
         await call.message.answer(text=f"Не удалось обработать изображение, попробуйте позже")
         print(e)
@@ -92,6 +115,7 @@ async def select_style(call: CallbackQuery, callback_data: StyleCallback, user: 
         config.LORA_KEY,
         avatar.api_name,
         f'{avatar.trigger_phrase} {style.capture_for_lora}',
+        #size=user.photo_format
     )
     
     try:
@@ -105,6 +129,18 @@ async def select_style(call: CallbackQuery, callback_data: StyleCallback, user: 
             caption="Готово",
             reply_markup=main_menu_keyboard()
         )
+        user.generation_count -= 1
+        await user.asave()
+        if user.generation_count <= 0:
+            await call.message.answer(
+                text='К сожалению, у вас закончились генерации',
+                reply_markup=InlineKeyboardMarkup(
+                    inline_keyboard=[
+                        [InlineKeyboardButton(text='Купить', callback_data='start_choise_tariff')]
+                    ]
+                )
+            )
+            return
     except Exception as e:
         await call.message.answer(text=f"Не удалось обработать изображение, попробуйте позже")
         print(e)

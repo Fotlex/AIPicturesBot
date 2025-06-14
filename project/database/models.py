@@ -4,18 +4,11 @@ from django.db import models
 
 
 class User(models.Model):
-    PHOTO_FORMAT = [
-        ('1:1', '1:1'),
-        ('3:4', '3:4'),
-        ('9:16', '9:16'),
-        ('16:9', '16:9'),
-    ]
-    
     id = models.BigIntegerField(primary_key=True)
     email = models.EmailField(null=True, blank=True)
     first_name = models.CharField('Имя', max_length=64)
     last_name = models.CharField('Фамилия', max_length=64)
-    photo_format = models.CharField('Формат фото', max_length=15, choices=PHOTO_FORMAT, default='1:1')
+    photo_format = models.CharField('Формат фото', max_length=15, default='square_hd')
     referrer_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='referrals')
     generation_count = models.IntegerField('Количество генераций', default=0)
     refferal_link = models.CharField(null=True, blank=True)
