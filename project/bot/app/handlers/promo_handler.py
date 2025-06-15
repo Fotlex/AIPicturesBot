@@ -53,17 +53,23 @@ async def take_promo(message: Message, state: FSMContext, user: User):
             
         await user.asave()
         
-        await message.answer(
-            text=f'Отлично, теперь вам доступны {user.generation_count} генераций\nНачните создание своего аватара!',
-            reply_markup=InlineKeyboardMarkup(
-                inline_keyboard=[[
-                    InlineKeyboardButton(
-                        text=GO_GENERATE_TEXT, 
-                        callback_data='instruction_avatar'
-                    )
-                ]]
+        if not user.current_avatar_id:
+            await message.answer(
+                text=f'Отлично, теперь вам доступны {user.generation_count} генераций\nНачните создание своего аватара!',
+                reply_markup=InlineKeyboardMarkup(
+                    inline_keyboard=[[
+                        InlineKeyboardButton(
+                            text=GO_GENERATE_TEXT, 
+                            callback_data='instruction_avatar'
+                        )
+                    ]]
+                )
             )
-        )
+        else:
+            await message.answer(
+                text='Отлтчно, приступайте к генерации!',
+                reply_markup=main_menu_keyboard()
+            )
         
     except Promocode.DoesNotExist:
         await message.answer(text=WITHOUT_PROMOCODE_TEXT, reply_markup=start_menu_keyboard())

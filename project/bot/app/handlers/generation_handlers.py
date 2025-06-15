@@ -58,3 +58,13 @@ async def db_format_change(callback: CallbackQuery, user: User):
     await user.asave()
     await callback.answer(text=f'Принято, следующие фото будут в формате {format}', show_alert=True)
     await callback.message.delete()
+    
+    
+@generate.message(F.text == 'Поддержка')
+async def sup(message: Message):
+    await message.answer(
+        text='Жми на кнопку, чтобы связаться с поддержкой',
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text='Поддержка', url=config.SUPPORT_URL)],
+        ])
+    )
