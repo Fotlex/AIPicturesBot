@@ -177,7 +177,7 @@ class Avatar(models.Model):
         super().save(*args, **kwargs)
     
     def __str__(self):
-        return f"Avatar ({self.gender}) for {self.user.first_name}"
+        return f"Avatar ({self.name}) for {self.user.first_name}"
     
     class Meta:
         verbose_name = 'Аватар'

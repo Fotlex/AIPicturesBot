@@ -8,6 +8,7 @@ from functools import partial
 from aiohttp import web
 from pathlib import Path
 
+from aiogram.types import BotCommand
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
@@ -35,7 +36,7 @@ from project.bot.app.webhooks import handle_payment_reminder_webhook
 
 async def start_webhook(bot: Bot):
     app = web.Application()
-    app.router.add_post('/yookassa/webhook', partial(kassa_webhook, bot=bot))
+    app.router.add_post('/yookassa/webhook/', partial(kassa_webhook, bot=bot))
     app.router.add_post('/payment-reminder/', handle_payment_reminder_webhook)
 
     runner = web.AppRunner(app)
@@ -46,6 +47,7 @@ async def start_webhook(bot: Bot):
     
 
 async def main():
+    print(config.YOOKASSA_SECRET_KEY)
     bot = Bot(
         token=config.BOT_TOKEN,
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),   
@@ -53,6 +55,13 @@ async def main():
     
     
     dp = Dispatcher()
+    
+    main_menu_commands = [
+        BotCommand(command='/start', description='🚀 Запустить/перезапустить бота'),
+        BotCommand(command='/first_menu', description='Меню для новика'),
+        BotCommand(command='/main_menu', description='Основное меню'),
+    ]
+    await bot.set_my_commands(main_menu_commands)
     
     dp.include_routers(
         start,

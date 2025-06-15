@@ -1,5 +1,5 @@
 from aiogram.types import Message, CallbackQuery
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, Command
 from aiogram import Router, F
 
 from ..keyboards import *
@@ -39,6 +39,25 @@ async def start_message(message: Message, user: User):
 
     
     await message.answer(text=START_TEXT, reply_markup=start_menu_keyboard(), parse_mode="Markdown",)
+    
+    
+@start.message(Command('first_menu'))
+async def f_menu(message: Message):
+    await message.answer(
+        text='Первоначальное меню', reply_markup=start_menu_keyboard()
+    )
+    
+    
+@start.message(Command('main_menu'))
+async def f_menu(message: Message, user: User):
+    if not user.current_avatar_id:
+        await message.answer(
+        text='Для открытия основного меню, пройдите инструкцию', reply_markup=start_menu_keyboard()
+        )
+        return
+    await message.answer(
+        text='Основное меню', reply_markup=main_menu_keyboard()
+    )
     
     
 @start.message(F.text == INSTRUCRION_BTN_TEXT)
