@@ -1,9 +1,10 @@
 from typing import List
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.filters import CommandStart
 from aiogram import Router, F, Bot
 from aiogram.fsm.context import FSMContext
 
+from pathlib import Path
 from aiohttp import ClientSession
 
 from ..keyboards import *
@@ -25,8 +26,10 @@ pay = Router()
 
 @pay.callback_query(F.data == 'start_buy')
 async def start_buy(callback: CallbackQuery):
-    await callback.message.edit_text(
-        text=PAY_DOCS_TEXT,
+    doc = FSInputFile("docs/Пользовательское_соглашение_и_Политика_конфиденциальности_v2.docx")
+    await callback.message.answer_document(
+        document=doc,
+        caption=PAY_DOCS_TEXT,
         reply_markup=InlineKeyboardMarkup(
             inline_keyboard=[
                 [InlineKeyboardButton(
@@ -37,12 +40,16 @@ async def start_buy(callback: CallbackQuery):
             ]
         )
     )
+    await callback.answer('')
+    await callback.message.delete()
 
 
 @pay.message(F.text == BUY_BTN_TEXT)
 async def start_buy(message: Message):
-    await message.answer(
-        text=PAY_DOCS_TEXT,
+    doc = FSInputFile("docs/Пользовательское_соглашение_и_Политика_конфиденциальности_v2.docx")
+    await message.answer_document(
+        document=doc,
+        caption=PAY_DOCS_TEXT,
         reply_markup=InlineKeyboardMarkup(
             inline_keyboard=[
                 [InlineKeyboardButton(
@@ -57,12 +64,13 @@ async def start_buy(message: Message):
     
 @pay.callback_query(F.data == 'start_choise_tariff')
 async def tariffs_list(callback: CallbackQuery):
-    await callback.message.edit_text(
+    await callback.message.answer(
         text=CHOISE_TARIFF_BTN,
         reply_markup=await tariffs_inline_keyboards()
     )
     
     await callback.answer('')
+    await callback.message.delete()
 
 
 @pay.callback_query(F.data.startswith('payment_'))
@@ -103,7 +111,6 @@ async def get_email(message: Message, state: FSMContext, user: User):
             reply_markup=InlineKeyboardMarkup(
                 inline_keyboard=[
                     [InlineKeyboardButton(text='💸', url=pay_url)],
-                    [InlineKeyboardButton(text='test', callback_data='instruction_avatar')]
                 ]
             )
         )
@@ -175,6 +182,7 @@ async def collect_photos(message: Message, state: FSMContext, bot: Bot, user: Us
         
         if result and result.get("status") == 'Completed':
             user.current_avatar_id = avatar.id
+            user.is_pay_error_avatar = False
             await message.answer(
                 text='Мы создали твой аватар, можем приступать к генерации фотографий',
                 reply_markup=main_menu_keyboard()

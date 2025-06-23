@@ -14,6 +14,7 @@ class User(models.Model):
     refferal_link = models.CharField(null=True, blank=True)
     current_avatar_id = models.UUIDField(null=True, blank=True)
     
+    is_pay_error_avatar = models.BooleanField(default=False)
     def __str__(self):
         return f'{self.id} | {self.first_name} {self.last_name}'
     

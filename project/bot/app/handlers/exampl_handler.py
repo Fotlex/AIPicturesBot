@@ -1,4 +1,4 @@
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.filters import CommandStart
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
@@ -18,4 +18,10 @@ exampl = Router()
 
 @exampl.message(F.text == EXAMPL_BTN_GENERATIONS)
 async def get_example(message: Message):
-    await message.answer('Тут будут примеры генераций')
+    photo = FSInputFile("docs/exampl.jpg")
+    await message.answer_photo(
+        photo=photo,
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text='Инструкция', callback_data='first_ok')]
+        ])
+    )

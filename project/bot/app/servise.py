@@ -46,7 +46,7 @@ async def generate_photo(auth_key, model_api_name, promt, seed=None, size='squar
         "prompt": promt,
         "image_size": size,
         "num_inference_steps": 25,
-        "guidance_scale": 3,
+        "guidance_scale": 7,
         "seed": seed,
     }
     

@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.append(str(BASE_DIR))
 
 from project.database.models import Tariffs, User
-
+from project import config
 
 start = Router()
 
@@ -71,11 +71,13 @@ async def description_bot(message: Message):
     
 @start.callback_query(F.data == 'first_ok')
 async def adout_photo(callback: CallbackQuery):
-    await callback.message.edit_text(
+    await callback.message.answer(
         text=DESCRIPTION_ABOUT_PHOTO,
         reply_markup=btn_descript_step_second(),
         parse_mode="Markdown",
     )
+    await callback.answer('')
+    await callback.message.delete()
     
     
 @start.callback_query(F.data == 'second_ok')
@@ -85,6 +87,7 @@ async def about_styles(callback: CallbackQuery):
         reply_markup=btn_descript_cost(),
         parse_mode="Markdown",
     )
+    await callback.answer('')
     
     
 @start.callback_query(F.data == 'cost_question')
@@ -98,7 +101,12 @@ async def about_styles(callback: CallbackQuery):
     await callback.message.edit_text(
             f"💰 **Стоимость пакетов**\n\n{text_about_tarifs}\n\n✅",
             reply_markup=InlineKeyboardMarkup(
-                inline_keyboard=[[InlineKeyboardButton(text=BUY_BTN_TEXT, callback_data="start_buy")]]
+                inline_keyboard=[
+                    [InlineKeyboardButton(text=BUY_BTN_TEXT, callback_data="start_buy")],
+                    [InlineKeyboardButton(text='Поддержка', url=config.SUPPORT_URL)]
+                ],
+                
             ),
             parse_mode="Markdown"
         )
+    await callback.answer('')

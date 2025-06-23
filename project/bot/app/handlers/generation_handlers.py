@@ -41,10 +41,11 @@ async def settings(message: Message):
 async def choise_format(callback: CallbackQuery, user: User):
     await callback.message.edit_reply_markup(
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text='1:1', callback_data='form-1:1')],
-            [InlineKeyboardButton(text='3:4', callback_data='form-3:4')],
-            [InlineKeyboardButton(text='9:16', callback_data='form-9:16')],
-            [InlineKeyboardButton(text='16:9', callback_data='form-16:9')],
+            [InlineKeyboardButton(text='1:1', callback_data='form-square_hd')],
+            [InlineKeyboardButton(text='3:4', callback_data='form-portrait_4_3')],
+            [InlineKeyboardButton(text='4:3', callback_data='form-landscape_4_3')],
+            [InlineKeyboardButton(text='9:16', callback_data='form-portrait_16_9')],
+            [InlineKeyboardButton(text='16:9', callback_data='form-landscape_16_9')],
         ])
     )
     

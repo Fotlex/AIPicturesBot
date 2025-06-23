@@ -30,6 +30,7 @@ from project.bot.app.handlers.pay_handler import pay
 from project.bot.app.handlers.styles_handler import style
 from project.bot.app.handlers.generation_handlers import generate
 from project.bot.app.handlers.avatar_handler import avatar_router
+from project.bot.app.handlers.exampl_handler import exampl
 from project.bot.app.yookassa import kassa_webhook
 from project.bot.app.webhooks import handle_payment_reminder_webhook
 
@@ -71,6 +72,7 @@ async def main():
         style,
         generate,
         avatar_router,
+        exampl,
     )
     
     await start_webhook(bot=bot)

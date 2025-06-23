@@ -96,6 +96,7 @@ async def show_my_avatars(callback: CallbackQuery, user: User):
     keyboard = create_avatar_pagination_keyboard(current_page_avatars, 0, total_pages)
 
     await callback.message.edit_text("Выберите аватар:", reply_markup=keyboard)
+    await callback.answer('')
 
 
 @avatar_router.callback_query(AvatarPaginator.filter(F.action.in_(["prev", "next"])))
@@ -142,16 +143,24 @@ async def add_avat(callback: CallbackQuery):
             [InlineKeyboardButton(text='Поддержка', url=config.SUPPORT_URL)],
         ])
     )
+    await callback.answer('')
     
     
 @avatar_router.callback_query(F.data == 'buy_avatar')
 async def pay_url_avatar(callback: CallbackQuery, user: User):
-    url = await payment_avatar_generate(user=user)
-    await callback.message.answer(
-        text='Жми для оплаты',
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text='Оплатить', url=url)]
-        ])
-    )
-    
+    if not user.is_pay_error_avatar: 
+        url = await payment_avatar_generate(user=user)
+        await callback.message.answer(
+            text='Жми для оплаты',
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text='Оплатить', url=url)]
+            ])
+        )
+    else:
+        await callback.message.answer(
+            text=f'✅Продолжите создание своего аватара!',
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text='Создать аватар', callback_data='instruction_avatar')]
+            ])
+        )
     await callback.answer('')

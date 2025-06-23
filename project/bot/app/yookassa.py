@@ -125,7 +125,8 @@ async def kassa_webhook(request: web.Request, bot: Bot):
                         [InlineKeyboardButton(text='Создать аватар', callback_data='instruction_avatar')]
                     ])
                 )
-            
+                user.is_pay_error_avatar = True
+                await user.asave()
         elif status == "canceled":
             payment.status = 'canceled' 
             await payment.asave()

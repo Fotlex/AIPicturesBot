@@ -81,8 +81,8 @@ async def select_style(call: CallbackQuery, callback_data: StyleCallback, user: 
     decode_photo_first = await generate_photo(
         config.LORA_KEY,
         avatar.api_name,
-        f'{avatar.trigger_phrase} {style.capture_for_lora}',
-        #size=user.photo_format
+        f'({avatar.trigger_phrase}) {style.capture_for_lora}',
+        size=user.photo_format
     )
     
     try:
@@ -114,8 +114,8 @@ async def select_style(call: CallbackQuery, callback_data: StyleCallback, user: 
     decode_photo_second = await generate_photo(
         config.LORA_KEY,
         avatar.api_name,
-        f'{avatar.trigger_phrase} {style.capture_for_lora}',
-        #size=user.photo_format
+        f'({avatar.trigger_phrase}) {style.capture_for_lora}',
+        size=user.photo_format
     )
     
     try:
