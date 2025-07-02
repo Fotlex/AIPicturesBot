@@ -9,12 +9,12 @@ class User(models.Model):
     first_name = models.CharField('Имя', max_length=64)
     last_name = models.CharField('Фамилия', max_length=64)
     photo_format = models.CharField('Формат фото', max_length=15, default='square_hd')
-    referrer_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='referrals')
+    referrer_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='referrals', editable=False)
     generation_count = models.IntegerField('Количество генераций', default=0)
-    refferal_link = models.CharField(null=True, blank=True)
-    current_avatar_id = models.UUIDField(null=True, blank=True)
+    refferal_link = models.CharField(null=True, blank=True, editable=False)
+    current_avatar_id = models.UUIDField(null=True, blank=True, editable=False)
     
-    is_pay_error_avatar = models.BooleanField(default=False)
+    is_pay_error_avatar = models.BooleanField(default=False, editable=False)
     def __str__(self):
         return f'{self.id} | {self.first_name} {self.last_name}'
     
@@ -82,7 +82,8 @@ class Styles(models.Model):
         on_delete=models.SET_NULL, 
         null=True,
         blank=True,
-        related_name='styles'
+        related_name='styles',
+        verbose_name='Категория'
     )
     
     def __str__(self):
@@ -107,7 +108,7 @@ class PaymentRecord(models.Model):
     amount = models.DecimalField('Сумма', max_digits=10, decimal_places=2, help_text="Сумма платежа")
     status = models.CharField('Статус', max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
-    metadata = models.JSONField(default=dict)
+    metadata = models.JSONField(default=dict, editable=False)
 
     def __str__(self):
         return f"Платеж {self.payment_id} - {self.status}"
@@ -161,12 +162,12 @@ class Avatar(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    name = models.CharField(max_length=100, default="Model")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="avatars")
+    name = models.CharField(max_length=100, default="Model", verbose_name='Имя аватара')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="avatars", verbose_name='Чей аватар')
     api_name = models.CharField(max_length=150, unique=True, editable=False, default="Уникальное имя для API LoRA", verbose_name="Уникальное имя для API LoRA")
-    is_complete = models.BooleanField(default=False)
-    trigger_phrase = models.CharField(max_length=100, default="Уникальная тригер-фраза для API LoRA")
-    gender = models.CharField(max_length=15, choices=GENDER_CHOICES, null=True, blank=True)
+    is_complete = models.BooleanField(default=False, editable=False)
+    trigger_phrase = models.CharField(max_length=100, default="Уникальная тригер-фраза для API LoRA", verbose_name="Уникальная тригер-фраза для API LoRA")
+    gender = models.CharField(max_length=15, choices=GENDER_CHOICES, null=True, blank=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):

@@ -15,7 +15,7 @@ from ..servise import generate_avatar, json
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.append(str(BASE_DIR))
 
-from project.database.models import Tariffs, User, Avatar
+from project.database.models import Tariffs, User, Avatar, UserArchive
 from project.bot.app.yookassa import payment_tarif_generate
 from project.bot.app.states import Email
 from project.database.services import process_and_save_photos
@@ -137,7 +137,7 @@ async def instruction_avatar(message: Message, state: FSMContext, user: User):
     )
     
     await message.answer(
-        text=f"📸 Отправьте мне 10 фотографий для создания аватара.\n"\
+        text=f"📸 Отправьте мне от 10 до 20 фотографий для создания аватара.\n"\
             f"Фотографии должны быть разными и хорошо освещенными!",
         reply_markup=None
     )
@@ -161,8 +161,8 @@ async def collect_photos(message: Message, state: FSMContext, bot: Bot, user: Us
     
     await state.update_data(photos=photos)
 
-    if len(photos) >= 10:
-        photos_to_process = photos[:10]
+    if 10 <= len(photos) <= 20:
+        photos_to_process = photos[:20]
 
         await message.answer("Спасибо! Все 10 фото получены. Начинаю обработку...")
         
@@ -194,13 +194,19 @@ async def collect_photos(message: Message, state: FSMContext, bot: Bot, user: Us
             
         else:
             await message.answer(
-                text=f"Что-то пошло не так, попробуем снова\n📸 Отправьте мне 10 фотографий для создания аватара.\n"\
+                text=f"Что-то пошло не так, попробуем снова\n📸 Отправьте мне от 10 до 20 фотографий для создания аватара.\n"\
                     f"Фотографии должны быть разными и хорошо освещенными!",
                 reply_markup=None
             )
             await avatar.adelete()
             await state.update_data(photos=[])
             await state.set_state(Email.wait_photos)
+            
+        try:
+            arch = await UserArchive.objects.aget(telegram_user_id=user.id)
+            await arch.adelete()
+        except Exception as e:
+            print(f'При удалении произошла ошибка - {e}')
         
         
         
