@@ -77,14 +77,14 @@ async def select_style(call: CallbackQuery, callback_data: StyleCallback, user: 
     await call.message.answer(
         text='Начинаю генерацию твоих фото...'
     )
-    
+    print(1)
     decode_photo_first = await generate_photo(
         config.LORA_KEY,
         avatar.api_name,
         f'({avatar.trigger_phrase}) {style.capture_for_lora}',
         size=user.photo_format
     )
-    
+    print(2)
     try:
         pil_image = decode_base64_to_image(decode_photo_first)
         image_bytes = convert_pil_to_bytes(pil_image)

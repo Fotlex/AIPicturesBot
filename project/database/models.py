@@ -12,7 +12,7 @@ class User(models.Model):
     referrer_by = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='referrals', editable=False)
     generation_count = models.IntegerField('Количество генераций', default=0)
     refferal_link = models.CharField(null=True, blank=True, editable=False)
-    current_avatar_id = models.UUIDField(null=True, blank=True, editable=False)
+    current_avatar_id = models.UUIDField(null=True, blank=True)
     
     is_pay_error_avatar = models.BooleanField(default=False, editable=False)
     def __str__(self):
@@ -160,14 +160,14 @@ class Avatar(models.Model):
         ('female', 'Женщина'),
     ]
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
 
     name = models.CharField(max_length=100, default="Model", verbose_name='Имя аватара')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="avatars", verbose_name='Чей аватар')
-    api_name = models.CharField(max_length=150, unique=True, editable=False, default="Уникальное имя для API LoRA", verbose_name="Уникальное имя для API LoRA")
-    is_complete = models.BooleanField(default=False, editable=False)
+    api_name = models.CharField(max_length=150, unique=True, default="Уникальное имя для API LoRA", verbose_name="Уникальное имя для API LoRA")
+    is_complete = models.BooleanField(default=False)
     trigger_phrase = models.CharField(max_length=100, default="Уникальная тригер-фраза для API LoRA", verbose_name="Уникальная тригер-фраза для API LoRA")
-    gender = models.CharField(max_length=15, choices=GENDER_CHOICES, null=True, blank=True, editable=False)
+    gender = models.CharField(max_length=15, choices=GENDER_CHOICES, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):

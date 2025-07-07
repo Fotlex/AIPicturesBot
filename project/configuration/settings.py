@@ -17,6 +17,7 @@ ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = [
     'https://fallaciously-jovial-sylph.cloudpub.ru',
     'https://responsibly-lawful-shearwater.cloudpub.ru',
+    'http://193.108.115.92',
 ]
 
 INSTALLED_APPS = [
