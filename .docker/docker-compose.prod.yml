@@ -1,0 +1,118 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: db_prod
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data/
+    env_file:
+      - ../project/.env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis_prod
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data_prod:/data
+    env_file:
+      - ../project/.env
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+
+  app:
+    build:
+      context: ../
+      dockerfile: .docker/python.Dockerfile
+    container_name: django_app_prod
+    command: python project/manage.py runserver 0.0.0.0:8000
+    expose:
+      - 8000
+    volumes:
+      - media_data_prod:/app/media
+      - static_data_prod:/app/static
+    env_file:
+      - ../project/.env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  bot:
+    build:
+      context: ../
+      dockerfile: .docker/python.Dockerfile
+    container_name: telegram_bot_prod
+    working_dir: /app/project
+    command: python bot/main.py
+    volumes:
+      - media_data_prod:/app/media
+      - static_data_prod:/app/static
+    env_file:
+      - ../project/.env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  celery_worker:
+    build:
+      context: ../
+      dockerfile: .docker/python.Dockerfile
+    container_name: celery_worker_prod
+    command: celery --workdir=/app/project -A configuration worker -l info
+    volumes:
+      - media_data_prod:/app/media
+      - static_data_prod:/app/static
+    env_file:
+      - ../project/.env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  nginx:
+    container_name: nginx_prod
+    build:
+      context: ../
+      dockerfile: ./.docker/nginx.Dockerfile
+      args:
+        NGINX_CONF_PATH: ./.docker/nginx/nginx.conf
+    ports:
+      - "443:443"
+    volumes:
+      - static_data_prod:/app/static:ro
+      - media_data_prod:/app/media:ro
+      - ./nginx/selfsigned.crt:/etc/nginx/certs/selfsigned.crt:ro
+      - ./nginx/selfsigned.key:/etc/nginx/certs/selfsigned.key:ro
+    environment:
+      APP_PORT: 443
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      DJANGO_APP_PORT: 8000
+      WEBHOOK_APP_PORT: 8080
+    depends_on: 
+      app:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  postgres_data_prod:
+  redis_data_prod:
+  media_data_prod:
+  static_data_prod:

@@ -211,6 +211,8 @@ async def collect_photos(message: Message, state: FSMContext, bot: Bot, user: Us
             print(f'При удалении произошла ошибка - {e}')
         
         
-        
-            
+@pay.message(F.photo)
+async def error_photo(message: Message):
+    await message.answer(text='Следуйте инструкции от бота, прежде чем отправлять фото')
+       
             
