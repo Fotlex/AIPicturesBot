@@ -171,8 +171,7 @@ async def collect_photos(message: Message, state: FSMContext, bot: Bot, user: Us
         file_relative_url = await process_and_save_photos(bot, message.from_user.id, photos)
         
         full_public_url = config.DEVELOP_URL + file_relative_url
-        print(full_public_url)
-        return
+        
         result = await generate_avatar(
             config.LORA_KEY,
             full_public_url,
