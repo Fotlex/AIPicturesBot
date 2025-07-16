@@ -57,6 +57,8 @@ services:
     container_name: telegram_bot_prod
     working_dir: /app/project
     command: python bot/main.py
+    expose:
+      - 8080
     volumes:
       - media_data_prod:/app/media
       - static_data_prod:/app/static
