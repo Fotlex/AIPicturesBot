@@ -200,7 +200,6 @@ async def collect_photos(message: Message, state: FSMContext, bot: Bot, user: Us
             )
             from pprint import pprint
             pprint(result)
-            await avatar.adelete()
             await state.update_data(photos=[])
             await state.set_state(Email.wait_photos)
             
