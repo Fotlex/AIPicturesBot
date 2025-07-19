@@ -22,6 +22,9 @@ wait_for_port "$POSTGRES_HOST" "$POSTGRES_PORT" "PostgreSQL"
 
 wait_for_port "$REDIS_HOST" "$REDIS_PORT" "Redis"
 
+mkdir -p /app/media/archives
+mkdir -p /app/static
+
 echo "Fixing permissions for media and static files..."
 chown -R app:app /app/static /app/media
 echo "Permissions fixed."

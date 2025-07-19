@@ -21,10 +21,9 @@ async def generate_avatar(auth_key, zip_url, model_name, trigger_phrase, target_
     try:
         async with aiohttp.ClientSession() as session:
             async with session.post(f'{config.TARGET_POST_URL}{target_url}', json=payload, allow_redirects=True) as response:
-                response.raise_for_status() 
-
                 response_data = await response.json()
                 logging.info(f"Сервер успешно ответил: {response_data}")
+                response.raise_for_status() 
                 return response_data
                 
     except aiohttp.ClientResponseError as e:
