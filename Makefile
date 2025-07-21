@@ -125,3 +125,20 @@ generate-self-signed-certs:
   		echo "Self-signed certificates already exist in .docker/nginx/. If you wish to regenerate, remove them first."; \
 	fi
 	@chmod 600 .docker/nginx/selfsigned.key
+
+
+.PHONY: get-certs
+get-certs: 
+	@echo "Attempting to obtain Let's Encrypt certificates for $(MAIN_DOMAIN)..."
+	@$(DOCKER_COMPOSE) run --rm certbot certonly --webroot -w /var/www/certbot \
+		--email $(LETSENCRYPT_EMAIL) --agree-tos --no-eff-email \
+		-d $(MAIN_DOMAIN) $(addprefix -d ,$(filter-out $(MAIN_DOMAIN),$(subst ,,$(ALLOWED_HOSTS))))
+	@echo "Reloading Nginx to pick up new certificates..."
+	@$(DOCKER_COMPOSE) exec nginx nginx -s reload
+
+.PHONY: renew-certs
+renew-certs: 
+	@echo "Attempting to renew Let's Encrypt certificates..."
+	@$(DOCKER_COMPOSE) run --rm certbot renew
+	@echo "Reloading Nginx to pick up renewed certificates..."
+	@$(DOCKER_COMPOSE) exec nginx nginx -s reload

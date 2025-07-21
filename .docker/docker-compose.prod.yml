@@ -101,20 +101,38 @@ services:
     volumes:
       - static_data_prod:/app/static:ro
       - media_data_prod:/app/media
-      - ./nginx/selfsigned.crt:/etc/nginx/certs/selfsigned.crt:ro
-      - ./nginx/selfsigned.key:/etc/nginx/certs/selfsigned.key:ro
+      - certbot_certs_prod:/etc/letsencrypt
+      - certbot_www_prod:/var/www/certbot
+
     environment:
       APP_PORT: 443
       ALLOWED_HOSTS: ${ALLOWED_HOSTS}
       DJANGO_APP_PORT: 8000
       WEBHOOK_APP_PORT: 8080
+      MAIN_DOMAIN: ${MAIN_DOMAIN}
     depends_on: 
       app:
         condition: service_started
     restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot
+    container_name: ipo_bot_certbot_prod
+    volumes:
+      - certbot_www_prod:/var/www/certbot
+      - certbot_certs_prod:/etc/letsencrypt
+    env_file:
+      - ../project/.env
+    depends_on:
+      nginx:
+        condition: service_started
+
 
 volumes:
   postgres_data_prod:
   redis_data_prod:
   media_data_prod:
   static_data_prod:
+  certbot_www_prod:
+  certbot_certs_prod:
+
