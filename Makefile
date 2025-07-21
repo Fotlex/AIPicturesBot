@@ -4,6 +4,8 @@ COMPOSE_FILE = .docker/docker-compose.prod.yml
 ENV_FILE = project/.env
 DOCKER_COMPOSE = docker compose -f $(COMPOSE_FILE) --env-file $(ENV_FILE)
 
+-include $(ENV_FILE)
+
 .PHONY: help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\036m%-30s\033[0m %s\n", $$1, $$2}'
@@ -129,12 +131,13 @@ generate-self-signed-certs:
 
 .PHONY: get-certs
 get-certs: 
-	@echo "Attempting to obtain Let's Encrypt certificates for $(MAIN_DOMAIN)..."
-	@$(DOCKER_COMPOSE) run --rm certbot certonly --webroot -w /var/www/certbot \
-		--email 'example@mail.ru' --agree-tos --no-eff-email \
-		-d $(MAIN_DOMAIN) $(addprefix -d ,$(filter-out $(MAIN_DOMAIN),$(subst ,,$(ALLOWED_HOSTS))))
-	@echo "Reloading Nginx to pick up new certificates..."
-	@$(DOCKER_COMPOSE) exec nginx nginx -s reload
+    @echo "Attempting to obtain Let's Encrypt certificates for $(MAIN_DOMAIN)..."
+    @$(DOCKER_COMPOSE) run --rm certbot certonly --webroot -w /var/www/certbot \
+        --email $(LETSENCRYPT_EMAIL) --agree-tos --no-eff-email \
+        -d $(MAIN_DOMAIN)
+    @echo "Reloading Nginx to pick up new certificates..."
+    @$(DOCKER_COMPOSE) exec nginx nginx -s reload
+
 
 .PHONY: renew-certs
 renew-certs: 
