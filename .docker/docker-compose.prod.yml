@@ -98,6 +98,7 @@ services:
         NGINX_CONF_PATH: ./.docker/nginx/nginx.conf
     ports:
       - "443:443"
+      - "80:80"
     volumes:
       - static_data_prod:/app/static:ro
       - media_data_prod:/app/media
